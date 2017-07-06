@@ -23,6 +23,11 @@ header('Content-type:text/html ; charset=utf-8');
 //商品
 class GoodsController extends Controller{
     public $layout ='goods';
+    public function actionIndex1()
+    {
+        echo 123;exit;
+        //return $this->renderPartial('login');
+    }
 
     //1.用户地址页,新增地址
     public function actionAddress(){

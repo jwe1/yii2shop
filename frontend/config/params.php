@@ -2,7 +2,7 @@
 return [
     'adminEmail' => 'admin@example.com',
     'wechat'=>[
-        [
+
             /**
              * Debug 模式，bool 值：true/false
              *
@@ -37,7 +37,7 @@ return [
              */
             'oauth' => [
                 'scopes'   => ['snsapi_base'],
-                'callback' => 'http://phpweixin.itsource.cn/php0217/jw/index.php',
+                'callback' => 'http://120.77.80.205/shop/frontend/web/wechat/callback.html',
             ],
             /**
              * 微信支付
@@ -62,5 +62,5 @@ return [
                 'verify' => false, // 关掉 SSL 认证（强烈不建议！！！）
             ],
         ]
-    ]
+
 ];
