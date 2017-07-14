@@ -78,10 +78,10 @@ $this->registerJsFile('@web/js/cart1.js',['depends'=>\yii\web\JqueryAsset::class
 <?php
 $url =\yii\helpers\Url::to('update-cart.html');
 $token = Yii::$app->request->csrfToken;
+$user = Yii::$app->user->isGuest;
 $this->registerJs(new \yii\web\JsExpression(
         <<<JS
  /*--JS计算商品总价--*/
-    
     $(function(){
             var total_money = 0;
         $('.money').each(function(){
@@ -122,20 +122,25 @@ $this->registerJs(new \yii\web\JsExpression(
      
      //点击提交，检测有没有收货地址，有就进行下一步，否则跳转到地址编辑页
      $('.checkout').click(function(){
+         console.debug(123);
          size = $('.goods_cart').size();
-         console.debug(size);
          if(size==0){
              alert('购物车还没有商品,请到商城选购');
          }else{
-             if($(this).attr('data-address')==1){
-                window.location.href ="cart2.html";
+             if("$user"){
+                 if(confirm("你好！请先登录")){
+                    window.location.href ="http://www.shop.com/user/login.html";
+                 }
              }else{
-               if(confirm("请填写收货地址")){
-                window.location.href ="address.html";
+                if($(this).attr('data-address')==1){
+                    window.location.href ="cart2.html";
+                }else{
+                   if(confirm("请填写收货地址")){
+                        window.location.href ="address.html";
+                  }
+                }
              }
-         }
-         }
-         
+         } 
      })
 JS
 ))

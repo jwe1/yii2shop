@@ -18,16 +18,14 @@ use yii\web\Controller;
 use yii\web\Cookie;
 use yii\web\NotFoundHttpException;
 use yii\web\Request;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\LabelAlignment;
+use Endroid\QrCode\QrCode;
 
 header('Content-type:text/html ; charset=utf-8');
 //商品
 class GoodsController extends Controller{
     public $layout ='goods';
-    public function actionIndex1()
-    {
-        echo 123;exit;
-        //return $this->renderPartial('login');
-    }
 
     //1.用户地址页,新增地址
     public function actionAddress(){
@@ -66,7 +64,7 @@ class GoodsController extends Controller{
             $address->status = 1 ;//设置新的默认地址
             $address->save(false);
             //echo '<script>alert("设置成功");</script>';
-            $this->redirect(['address'/*,'model'=>$model,'province'=>$province]*/]);
+            $this->redirect(['address']);
     }
 
     //5.用户修改,收货地址
@@ -128,23 +126,25 @@ class GoodsController extends Controller{
         ]);
         $goods  = $query->offset($page->offset)->limit($page->limit)->all();
         //关键字显示红色
-        $keywords = array_keys($res['words']);
-
-        $options = [
-            'before_match'=>'<span style="color:red">',
-            'after_match'=>'</span>',
-            'chunk_separator' => '...',
-            'limit' => 80, //如果内容超过80个字符，就使用...隐藏多余的的内容
-        ];
-        foreach ($goods as $k=>$v){
+        if($res){
+            $keywords = array_keys($res['words']);
+            $options = [
+                'before_match'=>'<span style="color:red">',
+                'after_match'=>'</span>',
+                'chunk_separator' => '...',
+                'limit' => 80, //如果内容超过80个字符，就使用...隐藏多余的的内容
+            ];
+            foreach ($goods as $k=>$v){
                 /* 可以有四个参数，前三个为必须
                 array $docs    ：     即从数据库取出来的结果数组(fetch_assoc)；
                 string $Index   ：    即我们在csft_mysql.conf 配置的索引名
                 string $words  ：     搜索的关键词*/
-            $name = $cl->BuildExcerpts([$v['name']],'goods',implode(',',$keywords),$options);
-            //使用的索引不能写*，关键字可以使用空格、逗号等符号做分隔，放心，sphinx很智能，会给你拆分的
-            $goods[$k]->name = $name[0];
+                $name = $cl->BuildExcerpts([$v['name']],'goods',implode(',',$keywords),$options);
+                //使用的索引不能写*，关键字可以使用空格、逗号等符号做分隔，放心，sphinx很智能，会给你拆分的
+                $goods[$k]->name = $name[0];
+            }
         }
+
 
         //var_dump($keyword);exit;
         return $this->render('search',['keywords'=>$keyword,'goods'=>$goods,'page'=>$page]);
@@ -206,6 +206,8 @@ class GoodsController extends Controller{
         //跳转到购物车
         return $this->redirect(['goods/cart1']);
     }
+
+
 
     //9.购物车显示页面,第一步
     public function actionCart1(){
@@ -533,7 +535,6 @@ class GoodsController extends Controller{
         //2 调用统一下单api
         $options = \Yii::$app->params['wechat'];
         $app = new Application($options);
-        $payment = $app->payment;
         //创建订单
         $attributes = [
             'trade_type'       => 'JSAPI', // JSAPI，NATIVE，APP...
@@ -553,7 +554,8 @@ class GoodsController extends Controller{
           //  $prepayId = $result->prepay_id;
             $code_url = $result->code_url;
 
-            //将交易链接制作成二维码（https://easywechat.org/zh-cn/docs/payment.html#支付结果通知）
+            //将交易链接制作成二维码（https://github.com/endroid/QrCode）
+
             $qrCode = new QrCode($code_url);
             $qrCode->setSize(300);
             header('Content-Type: '.$qrCode->getContentType());

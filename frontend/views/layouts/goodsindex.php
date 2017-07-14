@@ -146,10 +146,28 @@ use common\widgets\Alert;
                             ?>">去购物车结算</a>
                     <b></b>
                 </dt>
-                <dd>
-                    <div class="prompt">
-                        购物车中还没有商品，赶紧选购吧！
-                    </div>
+                <dd style="background: white">
+
+                      <!--  购物车中还没有商品，赶紧选购吧！-->
+                        <?php
+                            if(Yii::$app->user->isGuest){
+                                $carts = Yii::$app->session->get('cart');
+                            }else{
+                                $carts = \frontend\models\Cart::find()->where(['user_id'=>Yii::$app->user->id])->all();
+                            }
+                            if(empty($carts)){
+                                echo '购物车还没有商品';
+                            }else{
+                                foreach ($carts as $cart){
+                                    $good = \frontend\models\Goods::find()->where(['id'=>$cart['goods_id']])->one();
+                                    echo ' <div class="prompt" style="text-align:left;margin:20px 40px">';
+                                    echo '<img style="width:60px;" src="http://admin.shop.com'.$good['logo'].'">';
+                                    echo '<span style="margin:0 20px;color:blue">'.$good['name'].'</span>';
+                                    echo $cart->amount.'X<br/>';
+                                    echo '</div>';
+                                }
+                            }
+                        ?>
                 </dd>
             </dl>
         </div>
