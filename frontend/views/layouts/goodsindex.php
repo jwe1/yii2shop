@@ -32,27 +32,11 @@ use common\widgets\Alert;
         </div>
         <div class="topnav_right fr">
             <ul>
-                <?php
-
-                if(Yii::$app->user->isGuest){
-                    echo ' <li>您好，欢迎来到京西！[<a href="http://www.shop.com/user/login.html">登录</a>] [<a href="http://www.shop.com/user/register.html">免费注册</a>] </li>';
-                }else{
-                    echo ' <li>您好，欢迎来到京西！';
-                    echo Yii::$app->user->identity->username;
-                    echo ' || [<a href="http://www.shop.com/user/logout.html"> 注销 </a> ] </li>';
-                }
-                ?>
-<!--                <li>您好，欢迎来到京西！[<a href="login.html">登录</a>] [<a href="register.html">免费注册</a>] </li>
--->                <li class="line">|</li>
-                <li><?php if(Yii::$app->user->isGuest){
-                        echo '<a href="http://www.shop.com/user/login.html">我的订单</a>';
-                    }else{
-                        echo '<a href="http://www.shop.com/goods/order.html">我的订单</a>';
-                    }
-                    ?></li>
+                <li class="user-info">您好，欢迎来到京西！[<a href="http://www.shop.com/user/login.html">登录</a>] [<a href="http://www.shop.com/user/register.html">免费注册</a>]</li>
+                <li class="line">|</li>
+                <li><a href="http://www.shop.com/goods/order.html">我的订单</a></li>
                 <li class="line">|</li>
                 <li>客户服务</li>
-
             </ul>
         </div>
     </div>
@@ -98,12 +82,7 @@ use common\widgets\Alert;
                 </dt>
                 <dd>
                     <div class="prompt">
-                        <?php if(!Yii::$app->user->isGuest){
-                            echo '您好:'.Yii::$app->user->identity->username;
-                        }else{
-                            echo ' 您好，请<a href="login.html">登录</a>';
-                        }
-                        ?>
+                        您好，请<a href="http://www.shop.com/user/login.html">登录</a>
                     </div>
                     <div class="uclist mt10">
                         <ul class="list1 fl">
@@ -160,7 +139,7 @@ use common\widgets\Alert;
                             }else{
                                 foreach ($carts as $cart){
                                     $good = \frontend\models\Goods::find()->where(['id'=>$cart['goods_id']])->one();
-                                    echo ' <div class="prompt" style="text-align:left;margin:20px 40px">';
+                                    echo ' <div class="prompt1" style="text-align:left;margin:20px 40px">';
                                     echo '<img style="width:60px;" src="http://admin.shop.com'.$good['logo'].'">';
                                     echo '<span style="margin:0 20px;color:blue">'.$good['name'].'</span>';
                                     echo $cart->amount.'X<br/>';

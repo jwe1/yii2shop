@@ -5,7 +5,7 @@
 <div class="main w1210 mt10 bc">
     <!-- 面包屑导航 start -->
     <div class="breadcrumb">
-        <h2>当前位置：<a href="index.html">首页</a> > <a href="list.html?cate=<?=$goods_info->cate->id?>"><?=$goods_info->cate->name?></a> > <?=$goods_info['name']?></h2>
+        <h2>当前位置：<a href="index.html">首页</a> > <a href="list.html?cate=<?=$cateinfo->id?>"><?=$cateinfo->name?></a> > <?=$goods_info->name?></h2>
     </div>
     <!-- 面包屑导航 end -->
 
@@ -110,15 +110,15 @@
         <!-- 商品概要信息 start -->
         <div class="summary">
 <!--            <h3><strong>ThinkPad X230(23063T4）12.5英寸笔记本（i5-3230M 8GB 500G HD4000 指纹蓝牙 WIN8PRC 一年质保）</strong></h3>
--->            <h3><strong><?=$goods_info['name']?></strong></h3>
+-->            <h3><strong><?=$goods_info->name?></strong></h3>
 
             <!-- 图片预览区域 start -->
             <div class="preview fl">
                 <div class="midpic">
-                    <a href="http://admin.shop.com/<?php echo $goods_pic[1]['img']?>"  class="jqzoom" rel="gal1">                       <!-- 第一幅图片的大图 class 和 rel属性不能更改 -->
-                    <?=\yii\helpers\Html::img(Yii::getAlias('http://admin.shop.com'.$goods_pic[1]['img']),['style'=>'width:350px;height:348px'])?>
+
+        <?=\yii\helpers\Html::img(Yii::getAlias('http://admin.shop.com'.$goods_pic[1]['img']),['style'=>'width:350px;height:348px'])?>
                                      <!-- 第一幅图片的中图 -->
-                    </a>
+
                 </div>
 
                 <!--使用说明：此处的预览图效果有三种类型的图片，大图，中图，和小图，取得图片之后，分配到模板的时候，把第一幅图片分配到 上面的midpic 中，其中大图分配到 a 标签的href属性，中图分配到 img 的src上。 下面的smallpic 则表示小图区域，格式固定，在 a 标签的 rel属性中，分别指定了中图（smallimage）和大图（largeimage），img标签则显示小图，按此格式循环生成即可，但在第一个li上，要加上cur类，同时在第一个li 的a标签中，添加类 zoomThumbActive  -->
@@ -149,10 +149,11 @@
             <!-- 商品基本信息区域 start -->
             <div class="goodsinfo fl ml10">
                 <ul>
-                    <li><span>商品编号： </span><?=$goods_info['sn']?></li>
-                    <li class="market_price"><span>定价：</span><em>￥<?=$goods_info['market_price']?></em></li>
-                    <li class="shop_price"><span>本店价：</span> <strong>￥<?=$goods_info['shop_price']?></strong> <a href="">(降价通知)</a></li>
-                    <li><span>上架时间：</span><?=date('Y-m-d',$goods_info['create_time'])?></li>
+                    <li><span>商品编号： </span><?=$goods_info->sn?></li>
+                    <li class="market_price"><span>定价：</span><em>￥<?=$goods_info->market_price?></em></li>
+                    <li class="shop_price"><span>本店价：</span> <strong>￥<?=$goods_info->shop_price?></strong> <a href="">(降价通知)</a></li>
+                    <li><span>上架时间：</span><?=date('Y-m-d',$goods_info->create_time)?></li>
+                    <li><span>浏览量：</span><?=$goods_info->views?></li>
                     <li class="star"><span>商品评分：</span> <strong></strong><a href="">(已有21人评价)</a></li> <!-- 此处的星级切换css即可 默认为5星 star4 表示4星 star3 表示3星 star2表示2星 star1表示1星 -->
                 </ul>
                 <form action="<?=\yii\helpers\Url::to(['goods/cart_add'])?>" method="post" class="choose">
@@ -173,7 +174,7 @@
                                 <dt>&nbsp;</dt>
                                 <dd>
                                     <input type="submit" value="" class="add_btn" />
-                                    <input type="hidden" name="goods_id" value="<?=$goods_info['id']?>">
+                                    <input type="hidden" name="goods_id" value="<?=$goods_info->id?>">
                                     <input type="hidden" name="_csrf-frontend" id="_csrf-frontend" value="<?=Yii::$app->request->csrfToken?>">
                                 </dd>
                             </dl>
@@ -202,10 +203,10 @@
                 <div class="introduce detail_div none">
                     <div class="attr mt15">
                         <ul>
-                            <li><span>商品名称：</span><?=$goods_info['name']?></li>
-                            <li><span>商品编号：</span><?=$goods_info['sn']?></li>
+                            <li><span>商品名称：</span><?=$goods_info->name?></li>
+                            <li><span>商品编号：</span><?=$goods_info->sn?></li>
                             <li><span>品牌：</span><?=$goods_info->brand->name?></li>
-                            <li><span>上架时间：</span><?=date('Y-m-d H:i:s',$goods_info['create_time'])?></li>
+                            <li><span>上架时间：</span><?=date('Y-m-d H:i:s',$goods_info->create_time)?></li>
                             <li><span>商品毛重：</span>2.47kg</li>
                             <li><span>商品产地：</span>中国大陆</li>
                             <li><span>显卡：</span>集成显卡</li>

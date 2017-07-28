@@ -3,16 +3,21 @@ namespace frontend\controllers;
 
 
 use backend\models\Goods_pictures;
+use Codeception\Module\Redis;
 use frontend\components\SphinxClient;
 use frontend\models\Address;
 use frontend\models\Cart;
 use frontend\models\Goods;
+use frontend\models\Goods_Category;
 use frontend\models\Order;
 use frontend\models\OrderGoods;
+use frontend\models\Student;
 use yii\data\Pagination;
 use yii\db\Exception;
+use yii\db\Query;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\web\Application;
 use yii\web\Controller;
 use yii\web\Cookie;
@@ -150,16 +155,25 @@ class GoodsController extends Controller{
         return $this->render('search',['keywords'=>$keyword,'goods'=>$goods,'page'=>$page]);
     }
 
-    //7.商品详情页
+    //7.商品详情页，，需要在静态化，商品添加就生成
     public function actionGoods($id){
         //1.查出商品信息
         $goods_info = Goods::findOne(['id'=>$id]);
+        $cateinfo = Goods_Category::findOne(['id'=>$goods_info->goods_category_id]);
+        //2。跟新商品浏览量。保存redis中
+        $redis = new \Redis();
+        $redis->connect('127.0.0.1');
+        $views = $redis->incr('views_'.$id);
+        $goods_info->views = $views;
+
         //2.查出商品图片
         $goods_pic = Goods_pictures::find()->asArray()->where(['goods_id'=>$id])->limit(8)->all();
         $model = new Goods();
       //  var_dump($model->cate);exit;
-        return $this->render('goods',['model'=>$model,'goods_info'=>$goods_info,'goods_pic'=>$goods_pic]);
+        return $this->render('goods',['model'=>$model,'cateinfo'=>$cateinfo,'goods_info'=>$goods_info,'goods_pic'=>$goods_pic]);
     }
+
+
 
     //8.购物车操作,增加
     public function actionCart_add(){
@@ -482,7 +496,9 @@ class GoodsController extends Controller{
     //15.首页
     public function actionIndex(){
         $this->layout = 'goodsindex';
-        return $this->render('index');
+        $content = $this->render('index');
+       // file_put_contents('index.html',$content);
+        return $content;
     }
 
     //16.清理超时未支付订单
@@ -583,7 +599,53 @@ class GoodsController extends Controller{
         return $response;
     }
 
-    //20.权限管理
+
+    //20.获取登录用户的信息,显示到静态页面
+    public function actionUserInfo(){
+        $result = [
+            'status'=>0,
+            'name'=>null,
+        ];
+        if(!\Yii::$app->user->isGuest){
+            $result = [
+                'status'=>1,
+                'name'=>\Yii::$app->user->identity->username,
+            ];
+        }
+        echo  Json::encode($result);
+    }
+
+    //将商品浏览数写入到数据库,每次跟新1000条
+    public function actionGoodsView(){
+        //链接redis
+        $redis = new \Redis();
+        $redis->connect('127.0.0.1');
+        //判断当前跟新了多少次
+        $goods_view_times = $redis->get('goods_view_times');
+        if($goods_view_times ==null ){
+            $goods_view_times = 0;
+        }
+        //查出1000条商品
+        $query = new Query();
+        $ids = $query->select('id')->from('goods')->limit(1000)->offset($goods_view_times*1000)->column();
+        if(empty($ids)){//更新完成
+            $redis->del('goods_view_times');
+            echo 'over';exit;
+        }
+
+        foreach ($ids as $id){
+            $times = $redis->get('views_'.$id);
+            if($times){
+                Goods::updateAll(['views'=>$times],['id'=>$id]);
+            }
+        }
+        //记录当前更新了多少个1000
+        $redis->incr('goods_view_times');
+    }
+
+
+
+    //21.权限管理
     public function behaviors()
     {
         return [
@@ -593,17 +655,17 @@ class GoodsController extends Controller{
                     [//未认证的用户可以查看
                         'allow'=>true,//是否允许
                         'actions'=>['index','login','register',
-                            'cart_add','goods','cart1','test',
-                            'list','update-cart','search','clean'
+                            'cart_add','goods','cart1','test','user-info','del-student',
+                            'list','update-cart','search','clean','goods-view'
                         ],//指定操作
                         'roles'=>['?'],//？表示未认证用户
                     ],
                     [//老板,项目经理可以对商品增删改查
                         'allow'=>true,//是否允许
-                        'actions'=>['index','login','register',
-                            'cart_add','goods','cart1','list',
+                        'actions'=>['index','login','register','goods-view',
+                            'cart_add','goods','cart1','list','user-info',
                             'address','get-location','set-address',
-                            'edit-address','cart2','cart3','update-cart',
+                            'edit-address','cart2','cart3','update-cart','del-student',
                             'user','order','test','search','clean'
                         ],//指定操作
                         'roles'=>['@'],

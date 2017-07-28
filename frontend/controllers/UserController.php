@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use Codeception\Module\Redis;
 use frontend\models\Member;
 use yii\filters\AccessControl;
 
@@ -51,12 +52,27 @@ class UserController extends \yii\web\Controller
         if(!preg_match('/^1[34578]\d{9}$/',$tel)){
             echo '手机号格式不正确';exit;
         }
+        //个手机号一天只能发10条，一分钟只能发一条
+        $redis  = new \Redis();
+        $redis->connect('127.0.0.1');
+        $time = $redis->get('tel_'.$tel);//获取到时间，判断有没有
+        if($time && time()-$time<60){
+            echo '请等待'.(60-time()+$time).'秒再试';exit;
+        }
+        $num =  $redis->get('num_'.$tel.'_'.date('Ymd'));
+        if($num && $num>=10){
+            echo '每天最多发10条';exit;
+        }
+
         //发送短信
         $code = rand(1000,9999);
         $result =  \Yii::$app->sms->setNum(13678029077)->setPara(['code'=>$code])->send();
         if($result){
             //保存当前验证码 session  mysql  redis  不能保存到cookie
             \Yii::$app->cache->set($tel,$code,600);
+            //将发送信息保存到redis(发送时间，号码)
+            $redis->set('tel_'.$tel,time());
+            $redis->incr('num_'.$tel.'_'.date('Ymd'));//记录当天发的条数
             echo 'success';
         }else{
             echo '发送失败';

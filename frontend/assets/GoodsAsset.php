@@ -31,13 +31,13 @@ class GoodsAsset extends AssetBundle{
     ];
 
     public $js = [
+        'js/userinfo.js',
         'js/jquery-1.8.3.min.js',
         'js/header.js',
         'js/home.js',
         'js/index.js',
         'js/goods.js',
-        'js/jqzoom-core.js'
-
+        'js/jqzoom-core.js',
     ];
     public $depends = [
         'yii\web\JqueryAsset',

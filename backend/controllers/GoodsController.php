@@ -86,6 +86,17 @@ class GoodsController extends \yii\web\Controller
             $model->save();//保存商品信息
             $model2->goods_id=$model->getAttribute('id');
             $model2->save(); //保存文章内容
+
+            //添加成功，生成静态页面
+            $cateinfo  = Goods_Category::findOne(['id'=>$model->goods_category_id]);
+            //2.查出商品图片
+            $goods_pic = Goods_pictures::find()->asArray()->where(['goods_id'=>$model->id])->limit(8)->all();
+            $model3 = new Goods();
+
+            $content =  $this->render('@frontend/views/goods/goods',['model'=>$model3,'goods_info'=>$model,'id'=>$model->id,'cate'=>$model->goods_category_id,'cateinfo'=>$cateinfo,'goods_pic'=>$goods_pic]);
+
+            file_put_contents(\Yii::getAlias('@frontend'.'/web/goods/'.$model->id.'.html'),$content);
+
             //添加成功，跳转页面
             \Yii::$app->session->setFlash('success','商品添加成功');
             return $this->redirect(['goods/index']);

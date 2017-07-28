@@ -13,10 +13,10 @@ return [
     'language'=>'zh-CN',
     'controllerNamespace' => 'frontend\controllers',
     'components' => [
-    /*    'cache'=>[
+        'cache'=>[
            'class' => 'system.caching.CFileCache',
             'directoryLevel' => 2,
-        ],*/
+        ],
         'request' => [
             'csrfParam' => '_csrf-frontend',
             'enableCsrfValidation' => false,
